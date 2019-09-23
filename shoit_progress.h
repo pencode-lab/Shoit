@@ -37,7 +37,7 @@ SOFTWARE.
 #include <stdlib.h>
 
 
-
+//some progress code import from github's opensources,thanks author
 
 typedef struct st_progress_t{
     char chr;        /*tip char*/
