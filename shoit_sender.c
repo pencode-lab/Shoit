@@ -30,6 +30,26 @@ SOFTWARE.
 
 static progress_t progress;
 
+
+//////////////////static function//////////////////
+
+static void _sender_run_loop(shoit_core_t *sender);
+static void sender_free(shoit_core_t *sender);
+static bool tcpserver_init(shoit_core_t *sender);                                                                                    
+static void tcpserver_run(shoit_core_t *sender);
+static bool connect_udp_server(shoit_core_t *sender);
+static void blast_udp_sending(shoit_core_t *sender);
+static void transfer_thread_run(void *);
+static void progress_thread_run(void *);
+static void catch_signal_init();
+static void catch_signal(int sig);
+static bool echo_to_receiver_on_tcp(shoit_core_t *sender, int type);
+//////////////////////////
+
+
+
+
+
 /*sender->bucketSize change,so change other...*/
 void update_sender_bucket_infomation(shoit_core_t *sender)
 {
@@ -85,6 +105,7 @@ void update_sender_bucket_infomation(shoit_core_t *sender)
 void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize)
 {                                                                                                                                    
 
+    catch_signal_init();
     shoit_init_synch(sender);
 
     memset(&progress,0,sizeof(progress_t));
@@ -215,7 +236,6 @@ static void tcpserver_run(shoit_core_t *sender)
     int maxfdpl;
     int done=0;
     int retval;
-    int nread;   
 
     shoit_control_t crlhdr; /*tcp header*/
 
@@ -270,7 +290,7 @@ static void tcpserver_run(shoit_core_t *sender)
                             char *errorBitmap = (char*)(sender->errorBitmap+sizeof(shoit_control_t));
                             errorBitmap[0]=1;
                         }else {
-                            nread = shoit_network_readn(sender->tcpSockfd,
+                             shoit_network_readn(sender->tcpSockfd,
                                                     (char*)(sender->errorBitmap+sizeof(shoit_control_t)),
                                                     needReadLen);
                         }
@@ -391,9 +411,7 @@ static bool transfer_data_round_circle(shoit_core_t *sender)
 
     sem_wait(&sender->dataSem);/*be wakup:READY signal*/
 
-    gettimeofday(&curTime, NULL);                                                                                                    
-    startTime = curTime; 
-
+    gettimeofday(&startTime, NULL);                                                                                                    
     while(iMore && !done && sender->runing){                                                                                                  
         if(sender->verbose>1) SHOIT_LOG("sending UDP packets");                                                                      
         blast_udp_sending(sender); 
@@ -441,8 +459,6 @@ static void transfer_thread_run(void *argv)
 {
     shoit_core_t *sender = (shoit_core_t *)argv; 
     int done = 0;
-    struct timeval curTime, startTime;
-    double srate;
 
     if(sender->runing){
         if(!connect_udp_server(sender)){
@@ -644,7 +660,6 @@ static void sender_free(shoit_core_t *sender)
 
 static bool tcpserver_init(shoit_core_t *sender)
 {
-    struct sockaddr_in clientAddr; 
 
     if(sender->verbose>1)
         SHOIT_LOG("call %s, bindhost[%s:%d]\n",__func__,sender->bindHost,sender->tcpPort);

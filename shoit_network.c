@@ -114,7 +114,7 @@ int shoit_network_connect_udp(struct sockaddr_in *udpServerAddr,int localPort,ch
     bzero(udpServerAddr, sizeof(struct sockaddr_in));
     udpServerAddr->sin_family = AF_INET;
 
-    if (phe = gethostbyname(remoteHost))
+    if ((phe = gethostbyname(remoteHost)))
         memcpy(&udpServerAddr->sin_addr, phe->h_addr, phe->h_length);
     else if ((udpServerAddr->sin_addr.s_addr = inet_addr(remoteHost)) == INADDR_NONE)
     {   
@@ -185,7 +185,7 @@ int shoit_network_udp_server_init(struct sockaddr_in *udpLocalAddr,int udpLocalP
 
     // Use connected UDP to receive only from a specific host and port.
     bzero(&cliaddr, sizeof(cliaddr));
-    if (phe = gethostbyname(remoteHost))
+    if ((phe = gethostbyname(remoteHost)))
         memcpy(&cliaddr.sin_addr, phe->h_addr, phe->h_length);
     else if ((cliaddr.sin_addr.s_addr = inet_addr(remoteHost)) == INADDR_NONE){
         perror("gethostbyname remotehost error");
@@ -225,7 +225,7 @@ int shoit_network_connect_tcp(char * remoteHost,int remoteHostPort)
     bzero((char *)&tcpServerAddr, sizeof(tcpServerAddr));
     tcpServerAddr.sin_family = AF_INET;
 
-    if (phe = gethostbyname(remoteHost))
+    if ((phe = gethostbyname(remoteHost)))
         memcpy(&tcpServerAddr.sin_addr, phe->h_addr, phe->h_length);
     else if ((tcpServerAddr.sin_addr.s_addr = inet_addr(remoteHost)) == INADDR_NONE)
     {
@@ -280,7 +280,7 @@ int shoit_network_tcp_server_init(char *serverHost,int serverPort,struct sockadd
         tcpServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);                                                                           
     }else{                                                                                                                           
         struct hostent *phe;                                                                                                         
-        if (phe = gethostbyname(serverHost))                                                                                 
+        if ((phe = gethostbyname(serverHost)))                                                                                 
             memcpy(&tcpServerAddr.sin_addr, phe->h_addr, phe->h_length);                                                             
         else if ((tcpServerAddr.sin_addr.s_addr = inet_addr(serverHost)) == INADDR_NONE){                                    
             fprintf(stderr,"bind localhost error:%s\n",strerror(errno));                                                             

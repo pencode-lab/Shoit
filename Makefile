@@ -1,4 +1,4 @@
-CXXFLAGS= -O3  -D_GNU_SOURCE
+CXXFLAGS= -Wall -O3  -D_GNU_SOURCE
 PROGRAMS = sendfile recvfile  sendstream recvstream
 LIB_FLAGS =  -lpthread
 INCLUDES   = -I.

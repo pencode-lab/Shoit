@@ -68,6 +68,8 @@ static bool open_data_source(shoit_core_t *sender)
             return false;
         }
     }
+
+    return true;
 }
 
 static void close_data_source(shoit_core_t *sender)
@@ -83,20 +85,16 @@ int main(int argc,char **argv)
     int sendRate = SEND_RATE;
     int packetSize = MTU; 
     int port = 38000;
-    bool isTest = false;
 
     char *logFile =NULL;
 
-    bool useConf = true;
 
     char *localhost=NULL;
-    char *password; 
-    char *sendFile;
+    char *password=NULL;
+    char *sendFile=NULL;
 
     bool needDaemon=false;
 
-    struct sockaddr_storage sa;
-    socklen_t salen;
 
     static shoit_callbacks_t dataSource_callbacks = {&open_data_source,&close_data_source,NULL};
 
@@ -106,20 +104,15 @@ int main(int argc,char **argv)
         switch (ch) {
             case 'w': 
                 sendRate = atoi(optarg)>0 ? atoi(optarg) : sendRate;
-                useConf = false;
                 break;
             case 'l':
                 packetSize = (atoi(optarg)>512 && (atoi(optarg) < 65535)) ? atoi(optarg):packetSize;
-                useConf = false;
                 break;
             case 's':
                 localhost = strdup(optarg);
                 break;
             case 'p':
                 port = atoi(optarg)>0 ? atoi(optarg):port;
-                break;
-            case 'T':
-                isTest=true;
                 break;
             case 'E':/* event logging */
                 logFile = strdup(optarg); 

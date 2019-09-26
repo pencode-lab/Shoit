@@ -32,24 +32,4 @@ SOFTWARE.
 void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize);
 
 
-/////static functing//
-
-static void _sender_run_loop(shoit_core_t *sender);
-static void sender_free(shoit_core_t *sender);
-static bool tcpserver_init(shoit_core_t *sender);
-static void tcpserver_run(shoit_core_t *sender);
-
-static bool connect_udp_server(shoit_core_t *sender);
-
-static void blast_udp_sending(shoit_core_t *sender);
-
-static void transfer_thread_run(void *);
-static void progress_thread_run(void *);
-
-
-static void catch_signal_init();
-static void catch_signal(int sig);
-
-static bool echo_to_receiver_on_tcp(shoit_core_t *sender, int type);
-
 #endif

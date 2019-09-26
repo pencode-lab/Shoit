@@ -56,18 +56,14 @@ static ssize_t on_receiver(shoit_core_t *receiver,char *data, size_t len)
 int main(int argc,char **argv)
 {
 
-    struct timeval start, end;
-
-    char *password;
-    char *remoteHost;
+    char *password=NULL;
+    char *remoteHost=NULL;
     int port = 38000;
-    bool isTest = false;
 
     struct sockaddr_storage sa;
     socklen_t salen;
     char *logFile=NULL;
 
-    bool needDaemon=false;
 
     static shoit_callbacks_t recv_callbacks={NULL,NULL,&on_receiver};
 
@@ -78,19 +74,12 @@ int main(int argc,char **argv)
             case 'p':                                                                                                                   
                 port = atoi(optarg)>0 ? atoi(optarg):port;                                                                              
                 break;                                                                                                                  
-            case 'T':                                                                                                                   
-                isTest=true;                                                                                                            
-                break;                                                                                                                  
             case 'E':
                 logFile=shoit_misc_nocr(strdup(optarg));
                 break;
             case 'v':                                                                                                                   
                 shoit_show_copyright();                                                                                               
                 exit(1);                                                                                                                
-            case 'd':                                                                                                                
-                needDaemon=true;                                                                                                     
-                if(logFile==NULL) logFile="./shoit_recv.log";
-                break; 
             case 'h':                                                                                                                   
             default:                                                                                                                    
                 helpe(argv[0]);                                                                                                         

@@ -52,12 +52,10 @@ static void helpe(const char *progname)
 int main(int argc,char **argv)
 {
 
-    struct timeval start, end;
 
-    char *password;
-    char *remoteHost;
+    char *password=NULL;
+    char *remoteHost=NULL;
     int port = 38000;
-    bool isTest = false;
     char *saveFileName=NULL;//[SIZEOFFILENAME]={0};
 
     struct sockaddr_storage sa;
@@ -75,9 +73,6 @@ int main(int argc,char **argv)
                 break;                                                                                                                  
             case 'p':                                                                                                                   
                 port = atoi(optarg)>0 ? atoi(optarg):port;                                                                              
-                break;                                                                                                                  
-            case 'T':                                                                                                                   
-                isTest=true;                                                                                                            
                 break;                                                                                                                  
             case 'E':
                 logFile=shoit_misc_nocr(strdup(optarg));

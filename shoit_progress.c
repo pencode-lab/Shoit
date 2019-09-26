@@ -98,7 +98,6 @@ void shoit_progress_show_all(FILE *fp,progress_t *progress, float bit,long total
 
 void shoit_progress_for_stream(FILE *fp,progress_t *progress, float bit)
 {
-    int val = (int)(bit * progress->max);
     char buffer[512]={0};
 
     memset(buffer,0,512);

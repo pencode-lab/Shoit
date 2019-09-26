@@ -34,15 +34,5 @@ void receiver_run_loop(shoit_core_t *receiver,char *recvFile,int toFd);
 
 
 
-//static
-static bool echo_to_sender_on_tcp(shoit_core_t *receiver,int status);
-static void _receiver_run_loop(shoit_core_t *receiver,char *fileName);
-static void receiver_free(shoit_core_t *receiver);
-static void blast_udp_recving(shoit_core_t *receiver);
-static bool prepare_and_receiver_init(shoit_core_t *receiver,char *srcFileName,char *saveFileName);
-static bool each_round_transfer_init(shoit_core_t *receiver);
-
-static void transfer_thread_run(void *argv);
-static void progress_thread_run(void *argv);
 
 #endif

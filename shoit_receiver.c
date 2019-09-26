@@ -30,6 +30,20 @@ SOFTWARE.
 
 static progress_t progress;
 
+
+////////////////////static func/////////////
+static bool echo_to_sender_on_tcp(shoit_core_t *receiver,int status);
+static void _receiver_run_loop(shoit_core_t *receiver,char *fileName);                                                               
+static void receiver_free(shoit_core_t *receiver);
+static void blast_udp_recving(shoit_core_t *receiver);
+static bool prepare_and_receiver_init(shoit_core_t *receiver,char *srcFileName,char *saveFileName);
+static bool each_round_transfer_init(shoit_core_t *receiver);
+
+static void transfer_thread_run(void *argv);
+static void progress_thread_run(void *argv);
+
+//////////////////////////////////////////////
+
 void receiver_run_loop(shoit_core_t *receiver,char *recvFile,int toFd)
 {
     do{
@@ -248,7 +262,6 @@ static bool transfer_data_round_circle(shoit_core_t *receiver)
         if(errnum==0 && receiver->iStream) {                                                                                          
             uint64_t totalSize = receiver->payloadSize*(receiver->totalNumberOfPackets-1) +receiver->lastPayloadSize; 
             if(receiver->callbacks->on_recv_data(receiver,receiver->bucket,totalSize)<0){
-            //if(write(receiver->toFd,receiver->bucket,totalSize)<0){                              
                 SHOIT_LOG("write to receiver's toFd error:%s\n",strerror(errno));                                        
                 break;                                                                                                   
             }                                                                                                            
@@ -260,6 +273,7 @@ static bool transfer_data_round_circle(shoit_core_t *receiver)
         munmap(receiver->bucket,receiver->mapSize);
     }
 
+    return true;
 }
 
 static void transfer_thread_run(void *argv)
@@ -331,9 +345,7 @@ static void _receiver_run_loop(shoit_core_t *receiver,char *saveFile)
     int maxfdpl;
     int done=0;
     int retval;
-    int nread;
 
-    int fd=-1;
 
     shoit_control_t tcpCrl;
 
