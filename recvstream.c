@@ -35,7 +35,7 @@ static void catch_signal(int sig)
 
 static void helpe(const char *progname)
 {
-    printf("Usage: %s [remote host] [password] [options] \n"
+    printf("Usage: %s [remote host] [password] [options]|tar xvpf - \n"
            "Options:\n"
            "  -p <number>   Specifies the remote(sender) port number(default: 38000)\n"
            "  -v            Show version and copyight infomation\n"
@@ -46,6 +46,11 @@ static void helpe(const char *progname)
            "\n",
            progname);
     exit(0);
+}
+
+static ssize_t on_receiver(shoit_core_t *receiver,char *data, size_t len)
+{
+    return write(receiver->toFd,data,len);
 }
 
 int main(int argc,char **argv)
@@ -63,6 +68,8 @@ int main(int argc,char **argv)
     char *logFile=NULL;
 
     bool needDaemon=false;
+
+    static shoit_callbacks_t recv_callbacks={NULL,NULL,&on_receiver};
 
     /* resolve command line options and arguments */
     char ch;
@@ -140,6 +147,9 @@ int main(int argc,char **argv)
 
     receiver.iStream = true;
     int toFd =1;
+
+    receiver.callbacks = &recv_callbacks;
+
     receiver_run_loop(&receiver,NULL,toFd);  
 
 

@@ -44,6 +44,23 @@ static void helpe(const char *progname)
     exit(0);
 }
 
+static bool open_data_source(shoit_core_t *sender)                                                                                   
+{                                                                                                                                    
+                                                                                                                                     
+    sender->fromFd = -1;                                                                                                             
+    if(sender->iStream){/*data source is file of disk*/                                                                             
+        sender->fromFd = 0; /*from stdin, you can use youself stream pipe*/
+    }                                                                                                                                
+}                                                                                                                                    
+                                                                                                                                     
+static void close_data_source(shoit_core_t *sender)                                                                                  
+{                                                                                                                                    
+    if(sender->fromFd !=-1) {                                                                                                        
+        close(sender->fromFd);                                                                                                       
+        sender->fromFd = -1;                                                                                                         
+    }                                                                                                                                
+}         
+
 int main(int argc,char **argv)
 {
     int sendRate = SEND_RATE;
@@ -61,6 +78,8 @@ int main(int argc,char **argv)
 
     struct sockaddr_storage sa;
     socklen_t salen;
+
+    static shoit_callbacks_t dataSource_callbacks={&open_data_source,&close_data_source,NULL};
 
     /* resolve command line options and arguments */
     char ch;
@@ -104,14 +123,10 @@ int main(int argc,char **argv)
     argc -= optind;
     argv += optind;
     if (argc != 0){
-        //sendFile = *argv++;
         password = *argv++;
-
     }
-
     password = shoit_misc_nocr(password);
-    //sendFile = shoit_misc_nocr(sendFile);
-    if(!password ){   ///|| !sendFile) {
+    if(!password ){ 
         helpe(argv[0]);
         exit(1);
     }
@@ -135,10 +150,11 @@ int main(int argc,char **argv)
 
 
     sender.iStream =true; 
-    int fromFd = 0; //stdin
+
+    sender.callbacks = &dataSource_callbacks;
 
     /*run sender*/
-    sender_run_loop(&sender,sendRate,packetSize,fromFd);
+    sender_run_loop(&sender,sendRate,packetSize);
 
 
     

@@ -81,7 +81,7 @@ void update_sender_bucket_infomation(shoit_core_t *sender)
                      
 }
 
-void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize,int fromFd)
+void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize)
 {                                                                                                                                    
 
     shoit_init_synch(sender);
@@ -96,10 +96,13 @@ void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize,
     *assignment value to sender                                                                                               
     */
 
+    if(sender->callbacks->on_open_data(sender)==false){                                                                  
+        SHOIT_LOG("callbacks open data storage return false,will return.");                                                                    
+        return;                                                                                                                  
+    }  
+
     int pageSize = (int)sysconf(_SC_PAGESIZE);//4096 or 8192..
     if(sender->iStream){
-
-        sender->fromFd = fromFd; //stdin 
         sender->fileSize =0;/*stream,don't know file size*/
         sender->bucketSize = packetSize*pageSize*64;
         sender->bucket= (char *)malloc(sender->bucketSize);                                                                                  
@@ -111,19 +114,8 @@ void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize,
         }   
 
     }else if(sender->fileName!=NULL){
-        if(!sender->fileName || access(sender->fileName,F_OK)==-1){
-            SHOIT_LOG("The file does not exist <%s>\n",sender->fileName);
-            return;                                                                                                                      
-        }                                                                                                                                 
-                                                                                                                                     
-        struct stat filestat;                                                                                                            
-        if (stat(sender->fileName, &filestat) < 0) {                                                                                             
-            SHOIT_LOG("stat error(%s).\n",strerror(errno));                                                                              
-            return;                                                                                                                      
-        }                                                                                                                                
-    
-        uint64_t bucketSize = pageSize*packetSize*256*1;/*1G, pageSize 4096*/
-        uint64_t fileSize = filestat.st_size;
+        uint64_t bucketSize = pageSize*packetSize*256*1;/*1G, pageSize 4096*/                                                        
+        uint64_t fileSize = sender->fileSize;                                                                                        
         if(fileSize < bucketSize){                                                                                                       
             if(fileSize%pageSize)                                                                                                        
                 bucketSize = fileSize;                                                                                                   
@@ -131,19 +123,16 @@ void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize,
                 bucketSize = pageSize*((fileSize/pageSize)+1);                                                                           
             }                                                                                                                            
             fileSize = bucketSize;                                                                                                       
-        }    
+        }                                                                                                                            
+                                                                                                                                     
+        sender->fileSize = fileSize;                                                                                                 
+        sender->leftSize = sender->fileSize;                                                                                         
+        sender->bucketSize = bucketSize;
 
-        sender->fileSize = fileSize;
-        sender->leftSize = sender->fileSize; 
-        
-        sender->bucketSize = bucketSize;//filestat.st_size;                                                                                            
-        sender->fromFd = open(sender->fileName, O_RDONLY);                                                                                           
-        if (sender->fromFd < 0) {                                                                                                                
-            SHOIT_LOG("open file failed(%s).\n",sender->fileName);                                                                               
-            return;                                                                                                                      
-        }                                                                                                                                
-        sender->bucket=NULL;
+        sender->bucket=NULL;                                                                                                         
         sender->useMmap=true; 
+
+            
     }
 
     sender->sendRate = sendRate;
@@ -616,10 +605,13 @@ static void sender_free(shoit_core_t *sender)
         }
         sender->bucket=NULL;
     } 
+    sender->callbacks->on_close_data(sender);
+    /*
     if(sender->fromFd !=-1) {
         close(sender->fromFd);
         sender->fromFd = -1;
     }
+    */
     if(sender->toFd !=-1){
         close(sender->toFd);
         sender->toFd =-1;

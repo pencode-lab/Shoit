@@ -247,7 +247,8 @@ static bool transfer_data_round_circle(shoit_core_t *receiver)
         }                                                                                                                            
         if(errnum==0 && receiver->iStream) {                                                                                          
             uint64_t totalSize = receiver->payloadSize*(receiver->totalNumberOfPackets-1) +receiver->lastPayloadSize; 
-            if(write(receiver->toFd,receiver->bucket,totalSize)<0){                              
+            if(receiver->callbacks->on_recv_data(receiver,receiver->bucket,totalSize)<0){
+            //if(write(receiver->toFd,receiver->bucket,totalSize)<0){                              
                 SHOIT_LOG("write to receiver's toFd error:%s\n",strerror(errno));                                        
                 break;                                                                                                   
             }                                                                                                            

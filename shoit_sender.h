@@ -29,7 +29,7 @@ SOFTWARE.
 
 
 //public
-void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize,int fromFd);
+void sender_run_loop(shoit_core_t *sender,uint32_t sendRate,uint32_t packetSize);
 
 
 /////static functing//

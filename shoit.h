@@ -61,6 +61,7 @@ extern "C" {
 
 #define USEC(st, fi) (((fi)->tv_sec-(st)->tv_sec)*1000000+((fi)->tv_usec-(st)->tv_usec))
 
+typedef struct st_shoit_callbacks_t shoit_callbacks_t;
 
 
 typedef enum {
@@ -171,8 +172,24 @@ typedef struct st_shoit_core_t{
     bool useMmap;
     bool iStream;
     bool runing;
+
+    const shoit_callbacks_t  *callbacks;
     
 }shoit_core_t;
+
+typedef struct st_shoit_callbacks_t{
+    /**
+    * called for dataSource of sender 
+    */
+    bool  (*on_open_data)(shoit_core_t *shoit);
+    void  (*on_close_data)(shoit_core_t *shoit);
+
+    /**
+    * called for dataSource of recv stream 
+    */
+    ssize_t  (*on_recv_data)(shoit_core_t *shoit,char *data,size_t len);
+
+}shoit_callbacks_t;
 
 typedef bool (*cb_func_t)(void*);
 

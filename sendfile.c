@@ -44,6 +44,40 @@ static void helpe(const char *progname)
     exit(0);
 }
 
+
+static bool open_data_source(shoit_core_t *sender)
+{
+
+    sender->fromFd = -1;
+    if(!sender->iStream){/*data source is file of disk*/
+
+        if(!sender->fileName || access(sender->fileName,F_OK)==-1){
+            fprintf(stderr,"The file does not exist <%s>\n",sender->fileName);
+            return false;
+        }
+
+        struct stat filestat;
+        if (stat(sender->fileName, &filestat) < 0) {
+            fprintf(stderr,"stat error(%s).\n",strerror(errno));
+            return false;
+        }
+        sender->fileSize = filestat.st_size;
+        sender->fromFd = open(sender->fileName, O_RDONLY);
+        if (sender->fromFd < 0) {
+            fprintf(stderr,"open file failed(%s).\n",sender->fileName);
+            return false;
+        }
+    }
+}
+
+static void close_data_source(shoit_core_t *sender)
+{
+    if(sender->fromFd !=-1) {
+        close(sender->fromFd);
+        sender->fromFd = -1;
+    }
+}
+
 int main(int argc,char **argv)
 {
     int sendRate = SEND_RATE;
@@ -63,6 +97,8 @@ int main(int argc,char **argv)
 
     struct sockaddr_storage sa;
     socklen_t salen;
+
+    static shoit_callbacks_t dataSource_callbacks = {&open_data_source,&close_data_source,NULL};
 
     /* resolve command line options and arguments */
     char ch;
@@ -145,10 +181,11 @@ int main(int argc,char **argv)
 
 
     sender.iStream =false; 
-    int fromFd = -1; //stdin
+
+    sender.callbacks = &dataSource_callbacks;
 
     /*run sender*/
-    sender_run_loop(&sender,sendRate,packetSize,fromFd);
+    sender_run_loop(&sender,sendRate,packetSize);
 
 
     
