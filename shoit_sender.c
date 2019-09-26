@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #include "shoit_sender.h"
 #include "shoit_misc.h"
 #include "shoit_network.h"
@@ -367,7 +368,7 @@ static bool each_round_transfer_init(void *arg)
 }
 
 
-static bool transfer_data_round_circle(shoit_core_t *sender,cb_func_t handle)
+static bool transfer_data_round_circle(shoit_core_t *sender)
 {
     int done = 0;
     struct timeval curTime, startTime; 
@@ -378,9 +379,8 @@ static bool transfer_data_round_circle(shoit_core_t *sender,cb_func_t handle)
     /*
     * here need init this round variable,eg: sender->bucket...
     */
-    iMore = handle((void*)sender);/*each_round_transfer_init:get be send data and init para*/
+    iMore = each_round_transfer_init((void*)sender);
     if(!iMore) {
-        
         if(sender->verbose>1) SHOIT_LOG("No more bucket to be send.\n");
         return iMore;
     }
@@ -457,7 +457,7 @@ static void transfer_thread_run(void *argv)
     *if sendfile and mmap ,only one bucket
     */
     while(!done && sender->runing){
-        if(transfer_data_round_circle(sender,each_round_transfer_init) == false) break; /*no more*/
+        if(transfer_data_round_circle(sender) == false) break; /*no more*/
     }
 
 

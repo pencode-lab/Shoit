@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
 #ifndef SHOIT_H__ 
 #define SHOIT_H__
 
@@ -191,7 +192,6 @@ typedef struct st_shoit_callbacks_t{
 
 }shoit_callbacks_t;
 
-typedef bool (*cb_func_t)(void*);
 
 
 ////////////////////////////////function////////////
@@ -229,7 +229,6 @@ bool shoit_update_error_bitmap(shoit_core_t *shoit,uint64_t seq);
 uint64_t shoit_update_hash_table(shoit_core_t *shoit,bool update);
 
 void shoit_set_verbose(shoit_core_t *shoit, int v );
-
 
 
 
