@@ -443,6 +443,11 @@ static bool transfer_data_round_circle(shoit_core_t *sender)
             }
             */
             sender->remainNumberOfPackets = shoit_update_hash_table(sender,true);/*important!! update hashTable*/                    
+
+            double lossRate = (double)sender->remainNumberOfPackets / (double)sender->totalNumberOfPackets;
+            sender->usecsPerPacket = (int) ((double)sender->usecsPerPacket / (1.0 - lossRate - 0.05));
+            SHOIT_LOG("loss rate = %.2f, and update sendrate =%d.",lossRate,sender->usecsPerPacket);
+
         }   
     }   
 
